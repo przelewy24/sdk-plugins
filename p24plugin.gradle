@@ -1,0 +1,48 @@
+allprojects {
+	apply plugin: P24Plugin
+}
+
+class P24Plugin implements Plugin<Project> {
+
+	@Override
+	void apply(Project project) {
+
+		project.afterEvaluate {
+
+			def hasP24Dependency = project.configurations
+				.any { it.dependencies.any { it.group == "pl.przelewy24.sdk"} }
+
+			if (hasP24Dependency) {
+
+				def p24SdkUser = project.properties["p24SdkUser"] ?: "public"
+				def p24SdkPassword = project.properties["p24SdkPassword"] ?: "pass"
+
+				project.repositories {
+
+					maven {
+						name = "PublicP24MavenRepository"
+						url = "https://maven.pkg.github.com/przelewy24/sdk-public-packages"
+						credentials {
+							username = "przelewy24mobile"
+							password = "8dc13b138b5fc2fce33275b26a985fb2bf339f78"
+						}
+
+					}
+
+					if (p24SdkUser != "public") {
+						maven {
+							name = "PrivateP24MavenRepository"
+							url = "https://maven.pkg.github.com/przelewy24/sdk-private-packages"
+							credentials {
+								username = p24SdkUser
+								password = p24SdkPassword
+							}
+						}
+					}
+
+				}
+			}
+		}
+	}
+}
+
